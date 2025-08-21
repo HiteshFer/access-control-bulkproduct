@@ -2,8 +2,8 @@ const ProductBulkUploadService = require('../services/productBulkUploadService')
 const fs = require('fs');
 const path = require('path');
 
-class ProductBulkUploadController {
-  static async uploadProducts(req, res) {
+const ProductBulkUploadController = {
+  async uploadProducts(req, res) {
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -40,9 +40,9 @@ class ProductBulkUploadController {
         error: error.message,
       });
     }
-  }
+  },
 
-  static async getJobStatus(req, res) {
+  async getJobStatus(req, res) {
     try {
       const { jobId } = req.params;
 
@@ -74,9 +74,9 @@ class ProductBulkUploadController {
         error: error.message,
       });
     }
-  }
+  },
 
-  static async getAllJobs(req, res) {
+  async getAllJobs(req, res) {
     try {
       const jobs = await ProductBulkUploadService.getAllBulkUploadJobs();
 

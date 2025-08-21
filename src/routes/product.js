@@ -26,6 +26,6 @@ router.post('/upload', upload.single('file'), productBulkUploadController.upload
 router.get('/jobs/:jobId', productBulkUploadController.getJobStatus);
 
 // Get all jobs
-router.get('/jobs', productBulkUploadController.getAllJobs);
+router.get('/bulk/jobs', productBulkUploadController.getAllJobs);
 
 module.exports = router;

@@ -5,16 +5,16 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const Joi = require('joi');
 
-class ProductBulkUploadService {
   // Validation schema for product data
-  static productSchema = Joi.object({
-    name: Joi.string().required().trim().min(1).max(255),
-    description: Joi.string().allow('').max(1000),
-    status: Joi.string().required().trim().min(1).max(100),
-    category: Joi.string().required().trim().min(1).max(100),
-  });
+const productSchema = Joi.object({
+  name: Joi.string().required().trim().min(1).max(255),
+  description: Joi.string().allow('').max(1000),
+  status: Joi.string().required().trim().min(1).max(100),
+  category: Joi.string().required().trim().min(1).max(100),
+});
 
-  static async createBulkUploadJob(fileName, jobId) {
+const ProductBulkUploadService  = {
+  async createBulkUploadJob(fileName, jobId) {
     try {
       return await prisma.bulkUploadJob.create({
         data: {
@@ -26,9 +26,9 @@ class ProductBulkUploadService {
     } catch (error) {
       throw new Error(`Failed to create bulk upload job: ${error.message}`);
     }
-  }
+  },
 
-  static async updateBulkUploadJob(jobId, data) {
+  async updateBulkUploadJob(jobId, data) {
     try {
       return await prisma.bulkUploadJob.update({
         where: { jobId },
@@ -40,9 +40,9 @@ class ProductBulkUploadService {
     } catch (error) {
       throw new Error(`Failed to update bulk upload job: ${error.message}`);
     }
-  }
+  },
 
-  static async getBulkUploadJob(jobId) {
+  async getBulkUploadJob(jobId) {
     try {
       return await prisma.bulkUploadJob.findUnique({
         where: { jobId },
@@ -50,9 +50,9 @@ class ProductBulkUploadService {
     } catch (error) {
       throw new Error(`Failed to get bulk upload job: ${error.message}`);
     }
-  }
+  },
 
-  static async getAllBulkUploadJobs() {
+  async getAllBulkUploadJobs() {
     try {
       return await prisma.bulkUploadJob.findMany({
         orderBy: { createdAt: 'desc' },
@@ -60,9 +60,9 @@ class ProductBulkUploadService {
     } catch (error) {
       throw new Error(`Failed to get bulk upload jobs: ${error.message}`);
     }
-  }
+  },
 
-  static async processCsvFile(filePath) {
+  async processCsvFile(filePath) {
     return new Promise((resolve, reject) => {
       const products = [];
       const errors = [];
@@ -82,7 +82,7 @@ class ProductBulkUploadService {
             };
 
             // Validate the product data
-            const { error, value } = this.productSchema.validate(productData);
+            const { error, value } = productSchema.validate(productData);
             if (error) {
               errors.push({
                 line: lineNumber,
@@ -107,9 +107,9 @@ class ProductBulkUploadService {
           reject(error);
         });
     });
-  }
+  },
 
-  static async createProductsBatch(products) {
+  async createProductsBatch(products) {
     const results = {
       successful: [],
       failed: [],
@@ -136,9 +136,9 @@ class ProductBulkUploadService {
     }
 
     return results;
-  }
+  },
 
-  static async addToQueue(filePath, fileName) {
+  async addToQueue(filePath, fileName) {
     const jobId = `bulk-upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     await this.createBulkUploadJob(fileName, jobId);
