@@ -1,5 +1,5 @@
 ## Quick Start
-1. Clone the repo
+1. Clone the repo : `https://github.com/HiteshFer/access-control-bulkproduct.git`
 2. Install dependencies: `npm install`
 3. Setup database: `npx prisma db push`
 4. Seed database: `npm run seed`
