@@ -16,7 +16,7 @@ app.use(express.json({limit: '50mb'}));
 app.use(morgan('dev'));
 
 // Import and start worker
-// require('../workers/productProcessor');
+require('../workers/productProcessor');
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
