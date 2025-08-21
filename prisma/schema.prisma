@@ -1,0 +1,161 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+// MUST HAVE THIS DATASOURCE BLOCK
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  first_name   String
+  last_name    String
+  username     String
+  user_email   String   @unique
+  user_password String
+  role_id      Int
+  status       String   @default("1") // enum('1','0'), stored as string
+  is_deleted   String   @default("0") // enum('1','0'), stored as string
+  created_by   String   @default("")
+  updated_by   String   @default("")
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now())
+
+  @@map("admin_users")
+}
+
+model UserRole {
+  id           Int      @id @default(autoincrement())
+  user_type    String
+  status       String   @default("1")  // enum('1','0')
+  is_deleted   String   @default("0")  // enum('1','0')
+  created_by   String   @default("")
+  updated_by   String   @default("")
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now())
+  custom_order Int      @default(1)
+  parent_id    Int      @default(1)
+  access MappingMenusRoleAccess[] // One-to-many back relation
+
+  @@map("user_roles")
+}
+
+model Menu {
+  id          Int      @id @default(autoincrement())
+  menu_title  String
+  uri         String
+  route       String?    // nullable in SQL
+  created_by  String     @default("")
+  updated_by  String     @default("")
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @default(now())
+  status      String     @default("1") // enum('1','0')
+  is_deleted  String     @default("0") // enum('1','0')
+  menu_type   MenuType
+  parent_id   Int
+  icon        String
+  menu_table  String
+  page_title  String?    // nullable in SQL
+  position    Int        @default(0)
+  access MappingMenusRoleAccess[] // One-to-many back relation
+
+  @@map("menus")
+}
+
+// Enum for `menu_type` field
+enum MenuType {
+  super_admin
+  admin
+}
+
+model MappingMenusRoleAccess {
+  id          Int      @id @default(autoincrement())
+  role_id     Int
+  menu_id     Int
+  view        Int
+  add         Int
+  update      Int
+  delete      Int
+  export      Int
+  created_by  String   @default("")
+  updated_by  String   @default("")
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  role   UserRole @relation(fields: [role_id], references: [id])
+  menu   Menu     @relation(fields: [menu_id], references: [id])
+
+  @@map("mapping_menus_role_access")
+}
+
+
+model Product {
+  id          Int            @id @default(autoincrement())
+  name        String
+  description String?
+  category    String            @default("null")
+  status      String            @default("1")  // enum('1','0')
+  is_deleted  String            @default("0")  // enum('1','0')
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @default(now())
+  
+  prices      ProductPrice[]
+  variations  ProductVariation[]
+  
+  @@map("products")
+}
+
+model ProductPrice {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("INR")
+  priceType   String   @default("regular") // regular, sale, wholesale
+  validFrom   DateTime @default(now())
+  validUntil  DateTime?
+  status      String   @default("1")  // enum('1','0')
+  is_deleted  String   @default("0")  // enum('1','0')
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  @@map("product_prices")
+}
+
+model ProductVariation {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  name        String   // e.g., "Size", "Color"
+  value       String   // e.g., "Large", "Red"
+  sku         String?  @unique
+  stock       Int      @default(0)
+  price       Decimal? @db.Decimal(10, 2) // Override price for this variation
+  status      String   @default("1")  // enum('1','0')
+  is_deleted  String   @default("0")  // enum('1','0')
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  @@map("product_variations")
+}
+
+model BulkUploadJob {
+  id          Int   @id @default(autoincrement())
+  jobId       String   @unique
+  status      String   // pending, processing, completed, failed
+  fileName    String
+  totalRows   Int      @default(0)
+  processedRows Int    @default(0)
+  failedRows  Int      @default(0)
+  errors      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("bulk_upload_jobs")
+}
+
